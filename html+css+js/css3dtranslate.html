@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>css3d魔方</title>
+	<style type="text/css">
+		#content div{
+			position:absolute;
+			width: 200px;
+			height:200px;
+			/*background: rgba(255,255,192,1);*/
+			font-size: 80px;
+			text-align:center;
+			line-height: 200px;
+		}
+		#content{
+			margin:100px;
+			transform-style: preserve-3d;
+			/*perspective: 10000px;*/
+			perspective-origin: 50% 50%;
+			transform-origin: 100px 100px 0;
+			animation:mymove 10s infinite;
+			backface-visibility: hidden;
+		}
+		#content:hover{
+			animation:mymove 3s ease-in-out infinite;
+			backface-visibility: hidden;
+		}
+		@keyframes mymove{
+			from{
+				transform:rotateX(0deg) rotateY(0deg);
+			}
+			to{
+				transform:rotateX(360deg) rotateY(360deg);
+			}
+
+		}
+		.first{
+			background-color: rgba(255,128,0,1);
+			transform:translateZ(100px);
+		}
+		.second{
+			background-color: red;
+			transform: rotateX(90deg) translateZ(100px);
+		}
+		.third{
+			background: blue;
+			transform:rotateX(-90deg) translateZ(100px);
+		}
+		.fourth{
+			background: green;
+			transform:rotateY(90deg) translateZ(100px);
+		}
+		.fifth{
+			background: yellow;
+			transform:rotateY(-90deg) translateZ(100px);
+		}
+		.sixth{
+			background-color: lime;
+			transform:rotateX(180deg) translateZ(100px);
+		}
+	</style>
+</head>
+<body>
+	<div id="content">
+		<div class="first">1</div>
+		<div class="second">2</div>
+		<div class="third">3</div>
+		<div class="fourth">4</div>
+		<div class="fifth">5</div>
+		<div class="sixth">6</div>
+	</div>
+</body>
+</html>

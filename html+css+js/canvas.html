@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>canvas</title>
+    <style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        overflow: hidden;
+        background: #222;
+    }
+    </style>
+</head>
+
+<body>
+    <canvas></canvas>
+    <script type="text/javascript">
+    /*
+    		javascript
+    		基于原型的动态解释性脚本语言
+    		    原型   词法作用域   上下文
+    		canvas 时空隧道粒子
+    		    1.简单了解canvas绘制圆 API
+    		    2.面向对象开发 Particle
+    		    3.js中的一些问题
+    		1.querySelector单个节点对象
+    		querySelectorAll获取节点对象组合
+
+    		1.canvas绘制圆
+    		2.定时器 setInterval setTimeout
+    		setInterval 不稳定
+    		为什么丢帧
+    		    1.浏览器刷新频率  60FPS 一秒60帧
+    		    setInterval 间隔小于 1000/60 帧数混乱
+    		    2.内存 队列机制
+    		       看函数执行时间
+    		setTimeout延迟定时器  稳定性
+    		3.面向对象 基于原型
+    			1.初始化小球
+    			2.实例化小球
+    		requestAnimationFrame  H5 帧动画
+    		    根据cpu的钟摆频率来的
+			4.鼠标移动的时候实例化若干小球
+				1.获取鼠标坐标位置
+			5.孵化器
+			6.多样性  随机颜色  随机方位
+			7.圆周算法
+			
+    		*/
+    var canvas = document.querySelector('canvas'); //获取canvas节点对象
+    var ctx = canvas.getContext('2d'); //画布
+    var colors=['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'];
+    var wW = window.innerWidth;
+    var wH = window.innerHeight;
+    canvas.width = wW;
+    canvas.height = wH;
+    var particles=[];//粒子对象数组初始化
+    //绘制圆  圆心x  圆心y 半径  起始绘制角度  结束角度
+    var x=100,y=100;
+    var timer=null;
+    //timer=setInterval(render,30);
+    // function render() {//绘制函数
+    // 	x++;
+    // 	y++;
+    // 	ctx.clearRect(0,0,wW,wH);//清除画布
+    // 	ctx.beginPath();//清除路径
+    //     ctx.arc(x, y, 100, 0, Math.PI * 2);
+    //     ctx.fillStyle = '#222';
+    //     ctx.fill(); //实心绘制
+    // }
+    // function render(){
+    //	console.log(1);
+    // 	timer=setTimeout(render,40);
+    // }
+    //创建一个小球母本 Particle
+    function Particle(opt){
+    	//this代表粒子本身
+    	//不要在构造函数中写属性
+    	this.init(opt);
+    	
+    }
+    Particle.prototype={
+    	init:function(opt){
+    		this.x=opt.x||0;
+	    	this.y=opt.y||0;
+	    	this.radius=random(5,40);
+	    	this.color=random(colors);//颜色
+	    	this.force=random(2,8);//随机扩散半径
+	    	this.theta=random(0,Math.PI*2);//随机度数
+	    	this.vx=Math.cos(this.theta)*this.force;
+	    	this.vy=Math.sin(this.theta)*this.force;
+    	},
+    	update:function(){
+    		this.x+=this.vx;
+    		this.y+=this.vy;
+    		this.vx+=Math.cos(this.theta)*.1;
+    		this.vy+=Math.sin(this.theta)*.1;
+    		//摩擦系数
+    		this.vx*=.92;
+    		this.vy*=.92;
+    		this.radius*=.96;
+    	},
+    	draw:function(ctx){
+    		// ctx.clearRect(0,0,wW,wH);//清除画布
+	    	ctx.beginPath();//清除路径
+	        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+	        ctx.fillStyle = this.color;
+	        ctx.globalCompositeOperation='lighter';
+	        ctx.fill(); //实心绘制
+    	}
+    };
+    // var newParticle=new Particle({
+    // 	x:100,
+    // 	y:100,
+    // 	radius:100
+    // });
+    // var particle=new Particle({
+    // 	x:200,
+    // 	y:200,
+    // 	radius:100
+    // });
+    // newParticle.draw(ctx);
+    // particle.draw(ctx);
+    //鼠标移动事件
+    render();
+    function render(){
+    	ctx.clearRect(0,0,wW,wH);//清除画布
+	    ctx.beginPath();//清除路径
+	    for(var i=0;i<particles.length;i++){
+	    	particles[i].draw(ctx);
+	    	particles[i].update();
+	    }
+
+	    requestAnimationFrame(render);
+    }
+    canvas.onmousemove=function(e){
+    	//获取鼠标在页面上的位置
+    	var eX=e.pageX;
+    	var eY=e.pageY;
+    	for(var i=0;i<random(1,10);i++){
+    		spawn(eX,eY);
+    	}
+    }
+    //孵化器  专门用来实例化粒子对象
+    function spawn(eX,eY){
+    	var particle=new Particle({
+			x:eX,
+    		y:eY
+    	});
+    	if(particles.length>=800){
+    		particles.shift();//从前面开始删除
+    	}
+    	// particle.draw(ctx);
+    	particles.push(particle);
+    }
+    //随机数封装  最小值  最大值
+    function random(min,max){
+    	//又要处理数组  又要处理数字
+    	if(min.sort){
+    		//如果是数组  他有sort  他就是数组
+    		return min[~~(Math.random()*(min.length))];
+    	}else{
+			return ~~(min+Math.random()*(max-min));
+    	}
+    }
+
+    // function isArray(obj){
+    // 	return Object.prototype.toString.call(obj)==='[object Array]';
+    // }
+
+    // function render(){
+    // 	//console.log(1);
+    // 	x++;
+    // 	y++;
+    // 	ctx.clearRect(0,0,wW,wH);//清除画布
+    // 	ctx.beginPath();//清除路径
+    //     ctx.arc(x, y, 100, 0, Math.PI * 2);
+    //     ctx.fillStyle = '#222';
+    //     ctx.fill(); //实心绘制
+    // 	//requestAnimationFrame(render);
+    // }
+    </script>
+</body>
+
+</html>
